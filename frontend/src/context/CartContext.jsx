@@ -1,152 +1,140 @@
-/**
- * ============================================
- * CartContext — Shopping Cart State Management
- * ============================================
- * Provides cart CRUD operations with localStorage persistence.
- * Features:
- *  - Add/Remove/Update quantity
- *  - Cart totals calculation (subtotal, tax, discount)
- *  - Coupon code support
- *  - Persist cart across page reloads
- */
-
-import { createContext, useContext, useState, useEffect, useMemo } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
+import { cartApi } from "../services/api";
+import { useAuth } from "./AuthContext";
 
 const CartContext = createContext(null);
 
-// Custom hook to consume cart context
 export const useCart = () => {
   const context = useContext(CartContext);
   if (!context) throw new Error("useCart must be used within CartProvider");
   return context;
 };
 
-// Available coupon codes
-const COUPONS = {
-  SAVE10: { discount: 10, type: "percent", label: "10% off" },
-  FLAT200: { discount: 200, type: "flat", label: "₹200 off" },
-  WELCOME: { discount: 15, type: "percent", label: "15% off (Welcome)" },
+const emptySummary = {
+  subtotal: 0,
+  discount: 0,
+  tax: 0,
+  shipping: 0,
+  total: 0,
+  totalItems: 0,
+  savings: 0,
 };
 
 export const CartProvider = ({ children }) => {
-  // Initialize cart from localStorage
-  const [cartItems, setCartItems] = useState(() => {
-    const saved = localStorage.getItem("shopverse_cart");
-    return saved ? JSON.parse(saved) : [];
-  });
-
+  const { isAuthenticated } = useAuth();
+  const [cartItems, setCartItems] = useState([]);
   const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [summary, setSummary] = useState(emptySummary);
 
-  // Persist cart to localStorage on change
+  const syncCart = async (couponCode = appliedCoupon?.code || "") => {
+    if (!isAuthenticated) {
+      setCartItems([]);
+      setSummary(emptySummary);
+      setAppliedCoupon(null);
+      return null;
+    }
+    const data = await cartApi.get(couponCode);
+    setCartItems(data.items || []);
+    setSummary({
+      subtotal: data.subtotal || 0,
+      discount: data.discount || 0,
+      tax: data.tax || 0,
+      shipping: data.shipping || 0,
+      total: data.total || 0,
+      totalItems: data.totalItems || 0,
+      savings: data.savings || 0,
+    });
+    setAppliedCoupon(data.appliedCoupon || null);
+    return data;
+  };
+
   useEffect(() => {
-    localStorage.setItem("shopverse_cart", JSON.stringify(cartItems));
-  }, [cartItems]);
+    syncCart().catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated]);
 
-  /** Add item to cart (or increment quantity if exists) */
-  const addToCart = (product, quantity = 1) => {
-    setCartItems((prev) => {
-      const existing = prev.find((item) => item.id === product.id);
-      if (existing) {
-        toast.success("Quantity updated in cart");
-        return prev.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
-        );
-      }
-      toast.success(`${product.title} added to cart`);
-      return [...prev, { ...product, quantity }];
-    });
-  };
-
-  /** Remove item from cart entirely */
-  const removeFromCart = (productId) => {
-    setCartItems((prev) => {
-      const item = prev.find((i) => i.id === productId);
-      if (item) toast.success(`${item.title} removed from cart`);
-      return prev.filter((i) => i.id !== productId);
-    });
-  };
-
-  /** Update quantity of a specific item */
-  const updateQuantity = (productId, newQuantity) => {
-    if (newQuantity < 1) {
-      removeFromCart(productId);
-      return;
-    }
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.id === productId ? { ...item, quantity: newQuantity } : item
-      )
-    );
-  };
-
-  /** Clear entire cart */
-  const clearCart = () => {
-    setCartItems([]);
-    setAppliedCoupon(null);
-    toast.success("Cart cleared");
-  };
-
-  /** Apply coupon code */
-  const applyCoupon = (code) => {
-    const coupon = COUPONS[code.toUpperCase()];
-    if (coupon) {
-      setAppliedCoupon({ code: code.toUpperCase(), ...coupon });
-      toast.success(`Coupon "${code.toUpperCase()}" applied — ${coupon.label}`);
-      return true;
-    }
-    toast.error("Invalid coupon code");
+  const requireLogin = () => {
+    if (isAuthenticated) return true;
+    toast.error("Please login to use your cart");
     return false;
   };
 
-  /** Remove applied coupon */
-  const removeCoupon = () => {
+  const addToCart = async (product, quantity = 1) => {
+    if (!requireLogin()) return;
+    try {
+      await cartApi.add(product.id, quantity);
+      await syncCart();
+      toast.success(`${product.title} added to cart`);
+    } catch (err) {
+      toast.error(err.message || "Could not add to cart");
+    }
+  };
+
+  const removeFromCart = async (productId) => {
+    try {
+      await cartApi.remove(productId);
+      await syncCart();
+      toast.success("Item removed from cart");
+    } catch (err) {
+      toast.error(err.message || "Could not remove item");
+    }
+  };
+
+  const updateQuantity = async (productId, newQuantity) => {
+    try {
+      await cartApi.update(productId, newQuantity);
+      await syncCart();
+    } catch (err) {
+      toast.error(err.message || "Could not update quantity");
+    }
+  };
+
+  const clearCart = async () => {
+    try {
+      await cartApi.clear();
+      await syncCart();
+      toast.success("Cart cleared");
+    } catch (err) {
+      toast.error(err.message || "Could not clear cart");
+    }
+  };
+
+  const applyCoupon = async (code) => {
+    try {
+      const data = await syncCart(code);
+      if (data?.appliedCoupon) {
+        toast.success(`Coupon "${data.appliedCoupon.code}" applied`);
+        return true;
+      }
+      toast.error("Invalid coupon code");
+      return false;
+    } catch (err) {
+      toast.error(err.message || "Could not apply coupon");
+      return false;
+    }
+  };
+
+  const removeCoupon = async () => {
     setAppliedCoupon(null);
+    await syncCart("");
     toast.success("Coupon removed");
   };
 
-  // Memoized cart calculations
-  const cartSummary = useMemo(() => {
-    const subtotal = cartItems.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
-
-    let discount = 0;
-    if (appliedCoupon) {
-      discount =
-        appliedCoupon.type === "percent"
-          ? Math.round(subtotal * (appliedCoupon.discount / 100))
-          : appliedCoupon.discount;
-    }
-
-    const afterDiscount = subtotal - discount;
-    const tax = Math.round(afterDiscount * 0.18); // 18% GST
-    const shipping = subtotal > 999 ? 0 : 99;
-    const total = afterDiscount + tax + shipping;
-    const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-    const savings = cartItems.reduce(
-      (sum, item) =>
-        sum + (item.originalPrice - item.price) * item.quantity,
-      0
-    );
-
-    return { subtotal, discount, tax, shipping, total, totalItems, savings };
-  }, [cartItems, appliedCoupon]);
-
-  const value = {
-    cartItems,
-    addToCart,
-    removeFromCart,
-    updateQuantity,
-    clearCart,
-    applyCoupon,
-    removeCoupon,
-    appliedCoupon,
-    ...cartSummary,
-  };
+  const value = useMemo(
+    () => ({
+      cartItems,
+      addToCart,
+      removeFromCart,
+      updateQuantity,
+      clearCart,
+      applyCoupon,
+      removeCoupon,
+      appliedCoupon,
+      ...summary,
+    }),
+    [cartItems, appliedCoupon, summary]
+  );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 };

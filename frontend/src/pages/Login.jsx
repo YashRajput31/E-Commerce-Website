@@ -20,6 +20,7 @@ import {
   HiOutlineEye,
   HiOutlineEyeOff,
   HiOutlineArrowRight,
+  HiOutlineShieldCheck,
 } from "react-icons/hi";
 
 const Login = () => {
@@ -29,6 +30,7 @@ const Login = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("111111");
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
 
@@ -41,6 +43,8 @@ const Login = () => {
     else if (!/\S+@\S+\.\S+/.test(email)) errs.email = "Invalid email address";
     if (!password.trim()) errs.password = "Password is required";
     else if (password.length < 4) errs.password = "Password too short";
+    if (!otp.trim()) errs.otp = "OTP is required";
+    else if (otp.trim() !== "111111") errs.otp = "Default OTP is 111111";
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -50,7 +54,7 @@ const Login = () => {
     if (!validate()) return;
 
     try {
-      await login(email, password);
+      await login(email, password, otp);
       navigate(from, { replace: true });
     } catch {
       // Error handled in AuthContext via toast
@@ -137,6 +141,33 @@ const Login = () => {
             )}
           </div>
 
+          {/* OTP */}
+          <div>
+            <label className="block text-sm font-medium text-text-primary mb-1.5">
+              Verification OTP
+            </label>
+            <div className="relative">
+              <HiOutlineShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
+              <input
+                type="text"
+                inputMode="numeric"
+                maxLength={6}
+                value={otp}
+                onChange={(e) => {
+                  setOtp(e.target.value);
+                  if (errors.otp) setErrors((p) => ({ ...p, otp: "" }));
+                }}
+                placeholder="111111"
+                className={`w-full pl-12 pr-4 py-3 bg-dark-surface border rounded-xl text-sm text-text-primary placeholder-text-muted ${
+                  errors.otp ? "border-danger" : "border-dark-border/50"
+                }`}
+              />
+            </div>
+            {errors.otp && (
+              <p className="text-xs text-danger mt-1">{errors.otp}</p>
+            )}
+          </div>
+
           {/* Submit */}
           <button
             type="submit"
@@ -173,6 +204,8 @@ const Login = () => {
           <p className="text-xs text-text-muted text-center">
             <span className="font-semibold text-text-secondary">Admin access:</span>{" "}
             admin@shopverse.com / admin123
+            <br />
+            <span className="font-semibold text-text-secondary">OTP:</span> 111111
           </p>
         </div>
       </div>

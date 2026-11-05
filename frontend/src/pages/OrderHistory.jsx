@@ -9,9 +9,9 @@
  *  - Status color coding (Delivered, Shipped, Processing, Cancelled)
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { demoOrders } from "../data/products";
+import { ordersApi } from "../services/api";
 import {
   HiOutlineClipboardList,
   HiOutlineChevronDown,
@@ -29,6 +29,16 @@ const statusStyles = {
 
 const OrderHistory = () => {
   const [expandedOrder, setExpandedOrder] = useState(null);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    ordersApi
+      .list()
+      .then((data) => setOrders(data.orders || []))
+      .catch(() => setOrders([]))
+      .finally(() => setLoading(false));
+  }, []);
 
   const toggleExpand = (orderId) => {
     setExpandedOrder((prev) => (prev === orderId ? null : orderId));
@@ -51,7 +61,7 @@ const OrderHistory = () => {
 
       {/* Orders List */}
       <div className="space-y-4">
-        {demoOrders.map((order) => (
+        {orders.map((order) => (
           <div
             key={order.id}
             className="bg-dark-card border border-dark-border/50 rounded-2xl overflow-hidden hover:border-dark-border transition-colors duration-200"
@@ -150,7 +160,7 @@ const OrderHistory = () => {
       </div>
 
       {/* No orders fallback (if array were empty) */}
-      {demoOrders.length === 0 && (
+      {!loading && orders.length === 0 && (
         <div className="text-center py-20">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-dark-card mb-6">
             <HiOutlineShoppingBag className="w-10 h-10 text-text-muted" />

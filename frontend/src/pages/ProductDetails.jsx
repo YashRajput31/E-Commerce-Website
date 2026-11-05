@@ -13,8 +13,9 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import products from "../data/products";
+import { useProducts } from "../context/ProductContext";
 import { useCart } from "../context/CartContext";
+import { useWishlist } from "../context/WishlistContext";
 import ProductCard from "../components/ProductCard";
 import {
   HiStar,
@@ -25,6 +26,7 @@ import {
   HiOutlineShieldCheck,
   HiOutlineRefresh,
   HiOutlineHeart,
+  HiHeart,
   HiOutlineShare,
   HiMinus,
   HiPlus,
@@ -35,6 +37,8 @@ const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
+  const { products, loading } = useProducts();
 
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
@@ -60,9 +64,27 @@ const ProductDetails = () => {
   }, [id]);
 
   // 404 state
+  if (loading || !isLoaded) {
+    return (
+      <div className="w-full max-w-full px-6 sm:px-10 lg:px-16 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          <div className="skeleton aspect-square rounded-2xl" />
+          <div className="space-y-4">
+            <div className="skeleton h-6 w-24 rounded" />
+            <div className="skeleton h-10 w-3/4 rounded" />
+            <div className="skeleton h-4 w-1/3 rounded" />
+            <div className="skeleton h-8 w-1/4 rounded" />
+            <div className="skeleton h-24 w-full rounded" />
+            <div className="skeleton h-12 w-full rounded-xl" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!product) {
     return (
-      <div className="w-full max-w-7xl mx-auto px-4 py-20 text-center">
+      <div className="w-full max-w-full px-6 sm:px-10 lg:px-16 py-20 text-center">
         <p className="text-6xl mb-4">😕</p>
         <h2 className="text-2xl font-bold text-text-primary mb-2">
           Product Not Found
@@ -81,24 +103,6 @@ const ProductDetails = () => {
   }
 
   // Skeleton loading
-  if (!isLoaded) {
-    return (
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-          <div className="skeleton aspect-square rounded-2xl" />
-          <div className="space-y-4">
-            <div className="skeleton h-6 w-24 rounded" />
-            <div className="skeleton h-10 w-3/4 rounded" />
-            <div className="skeleton h-4 w-1/3 rounded" />
-            <div className="skeleton h-8 w-1/4 rounded" />
-            <div className="skeleton h-24 w-full rounded" />
-            <div className="skeleton h-12 w-full rounded-xl" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   const discountPercent = product.originalPrice
     ? Math.round(
         ((product.originalPrice - product.price) / product.originalPrice) * 100
@@ -118,7 +122,7 @@ const ProductDetails = () => {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16">
+    <div className="w-full max-w-full px-6 sm:px-10 lg:px-16 py-8 space-y-16">
       {/* Back Button */}
       <button
         onClick={() => navigate(-1)}
@@ -278,9 +282,20 @@ const ProductDetails = () => {
 
           {/* Quick actions */}
           <div className="flex items-center gap-4 pt-2">
-            <button className="flex items-center gap-1.5 text-sm text-text-secondary hover:text-accent transition-colors">
-              <HiOutlineHeart className="w-4 h-4" />
-              Wishlist
+            <button
+              onClick={() => toggleWishlist(product)}
+              className={`flex items-center gap-1.5 text-sm transition-colors ${
+                isInWishlist(product.id)
+                  ? "text-accent"
+                  : "text-text-secondary hover:text-accent"
+              }`}
+            >
+              {isInWishlist(product.id) ? (
+                <HiHeart className="w-4 h-4 text-accent" />
+              ) : (
+                <HiOutlineHeart className="w-4 h-4" />
+              )}
+              {isInWishlist(product.id) ? "Wishlisted" : "Wishlist"}
             </button>
             <button className="flex items-center gap-1.5 text-sm text-text-secondary hover:text-primary transition-colors">
               <HiOutlineShare className="w-4 h-4" />

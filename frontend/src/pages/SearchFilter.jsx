@@ -11,12 +11,14 @@
  */
 
 import { useState, useMemo } from "react";
-import products, { categories, priceRanges } from "../data/products";
+import { priceRanges } from "../data/products";
+import { useProducts } from "../context/ProductContext";
 import ProductCard from "../components/ProductCard";
 import SearchBar from "../components/SearchBar";
 import { HiOutlineSearch, HiOutlineX } from "react-icons/hi";
 
 const SearchFilter = () => {
+  const { products, categories } = useProducts();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedPriceRange, setSelectedPriceRange] = useState(null);

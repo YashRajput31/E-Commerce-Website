@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 /* ============================================
@@ -6,47 +7,46 @@
 
 /* Custom CSS Variables for brand theming */
 @theme {
-  --color-primary: #6C5CE7;
-  --color-primary-dark: #5A4BD1;
-  --color-primary-light: #A29BFE;
-  --color-secondary: #00CEC9;
-  --color-secondary-dark: #00B5B0;
-  --color-accent: #FD79A8;
-  --color-accent-dark: #E84393;
-  --color-dark: #0F0F1A;
-  --color-dark-card: #1A1A2E;
-  --color-dark-surface: #16213E;
-  --color-dark-border: #2A2A4A;
-  --color-text-primary: #E8E8F0;
-  --color-text-secondary: #9CA3AF;
-  --color-text-muted: #6B7280;
-  --color-success: #00B894;
-  --color-warning: #FDCB6E;
-  --color-danger: #FF6B6B;
-  --color-gold: #F39C12;
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --color-primary: #4F46E5;
+  --color-primary-dark: #4338CA;
+  --color-primary-light: #818CF8;
+  --color-secondary: #0D9488;
+  --color-secondary-dark: #0F766E;
+  --color-accent: #DB2777;
+  --color-accent-dark: #BE185D;
+  --color-dark: #F0F4F8;
+  --color-dark-card: #FFFFFF;
+  --color-dark-surface: #E2E8F0;
+  --color-dark-border: #CBD5E1;
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #334155;
+  --color-text-muted: #64748B;
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
+  --color-gold: #F59E0B;
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
 }
 
 /* Base styles */
 html, body {
   width: 100%;
+  height: 100%;
   min-height: 100vh;
   margin: 0;
   padding: 0;
+  overflow-x: hidden;
 }
 
 #root {
   width: 100%;
+  height: 100%;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+
 
 html {
   scroll-behavior: smooth;
@@ -55,10 +55,17 @@ html {
 body {
   font-family: var(--font-sans);
   background-color: var(--color-dark);
+  background-image: radial-gradient(circle at top right, rgba(99, 102, 241, 0.05) 0%, transparent 40%),
+                    radial-gradient(circle at bottom left, rgba(13, 148, 136, 0.05) 0%, transparent 40%);
   color: var(--color-text-primary);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Add subtle depth to cards */
+.bg-dark-card {
+  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.05);
 }
 
 /* Custom scrollbar */
@@ -173,10 +180,10 @@ body {
 
 /* Glassmorphism utility */
 .glass {
-  background: rgba(26, 26, 46, 0.7);
+  background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(108, 92, 231, 0.15);
+  border: 1px solid rgba(226, 232, 240, 0.8);
 }
 
 /* Gradient text utility */

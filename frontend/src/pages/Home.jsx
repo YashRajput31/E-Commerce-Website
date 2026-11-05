@@ -14,7 +14,8 @@
 
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import products, { categories, testimonials } from "../data/products";
+import { testimonials } from "../data/products";
+import { useProducts } from "../context/ProductContext";
 import ProductCard from "../components/ProductCard";
 import {
   HiOutlineShoppingBag,
@@ -49,6 +50,7 @@ const categoryGradients = {
 
 const Home = () => {
   const [isLoaded, setIsLoaded] = useState(false);
+  const { products, categories, loading } = useProducts();
 
   // Simulate page loading
   useEffect(() => {
@@ -63,7 +65,7 @@ const Home = () => {
     .slice(0, 4);
 
   // Loading skeleton
-  if (!isLoaded) {
+  if (!isLoaded || loading) {
     return (
       <div className="space-y-8 p-6">
         <div className="skeleton h-96 rounded-2xl" />
@@ -84,15 +86,15 @@ const Home = () => {
   return (
     <div className="w-full space-y-16 pb-16">
       {/* ===== HERO SECTION ===== */}
-      <section className="relative overflow-hidden">
+      <section className="relative overflow-hidden min-h-[calc(100vh-80px)] flex items-center justify-center">
         {/* Background gradient orbs */}
-        <div className="absolute inset-0">
+        <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-10 left-10 w-72 h-72 bg-primary/20 rounded-full blur-3xl" />
           <div className="absolute bottom-10 right-10 w-96 h-96 bg-secondary/15 rounded-full blur-3xl" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-accent/10 rounded-full blur-3xl" />
         </div>
 
-        <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
+        <div className="relative w-full max-w-full px-6 sm:px-10 lg:px-16 py-10">
           <div className="w-full max-w-3xl mx-auto text-center space-y-6 animate-fade-in-up">
             {/* Tag */}
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium">
@@ -150,7 +152,7 @@ const Home = () => {
       </section>
 
       {/* ===== TRUST BADGES ===== */}
-      <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8">
+      <section className="w-full max-w-full px-6 sm:px-10 lg:px-16">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { icon: HiOutlineTruck, title: "Free Shipping", desc: "On orders above ₹999" },
@@ -175,7 +177,7 @@ const Home = () => {
       </section>
 
       {/* ===== CATEGORIES ===== */}
-      <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="w-full max-w-full px-6 sm:px-10 lg:px-16">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-2xl font-bold text-text-primary">
@@ -214,7 +216,7 @@ const Home = () => {
       </section>
 
       {/* ===== FEATURED PRODUCTS ===== */}
-      <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="w-full max-w-full px-6 sm:px-10 lg:px-16">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-2xl font-bold text-text-primary">
@@ -240,7 +242,7 @@ const Home = () => {
       </section>
 
       {/* ===== OFFERS BANNER ===== */}
-      <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="w-full max-w-full px-6 sm:px-10 lg:px-16">
         <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary via-primary-dark to-secondary p-8 md:p-12">
           {/* Background decoration */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/3 translate-x-1/4" />
@@ -273,7 +275,7 @@ const Home = () => {
       </section>
 
       {/* ===== TRENDING PRODUCTS ===== */}
-      <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="w-full max-w-full px-6 sm:px-10 lg:px-16">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-2xl font-bold text-text-primary flex items-center gap-2">
@@ -293,7 +295,7 @@ const Home = () => {
       </section>
 
       {/* ===== TESTIMONIALS ===== */}
-      <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="w-full max-w-full px-6 sm:px-10 lg:px-16">
         <div className="text-center mb-10">
           <h2 className="text-2xl font-bold text-text-primary">
             What Our Customers Say

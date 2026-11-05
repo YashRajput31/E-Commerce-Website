@@ -14,6 +14,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
+import { ordersApi } from "../services/api";
 import toast from "react-hot-toast";
 import {
   HiOutlineTruck,
@@ -45,6 +46,7 @@ const Checkout = () => {
   const [errors, setErrors] = useState({});
   const [isPlacing, setIsPlacing] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
+  const [placedOrder, setPlacedOrder] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -70,20 +72,28 @@ const Checkout = () => {
     return Object.keys(errs).length === 0;
   };
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (!validate()) {
       toast.error("Please fix the form errors");
       return;
     }
 
     setIsPlacing(true);
-    // Simulate order placement
-    setTimeout(() => {
+    try {
+      const data = await ordersApi.create({
+        shipping: form,
+        paymentMethod,
+        couponCode: null,
+      });
+      setPlacedOrder(data.order);
       setIsPlacing(false);
       setOrderPlaced(true);
       clearCart();
-      toast.success("Order placed successfully! 🎉");
-    }, 1500);
+      toast.success("Order placed successfully!");
+    } catch (err) {
+      setIsPlacing(false);
+      toast.error(err.message || "Could not place order");
+    }
   };
 
   // Empty cart redirect
@@ -121,7 +131,7 @@ const Checkout = () => {
           Thank you for shopping with ShopVerse.
         </p>
         <p className="text-sm text-text-muted mb-8">
-          Order ID: <span className="font-mono text-text-secondary">ORD-{Date.now().toString().slice(-8)}</span>
+          Order ID: <span className="font-mono text-text-secondary">{placedOrder?.id}</span>
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link

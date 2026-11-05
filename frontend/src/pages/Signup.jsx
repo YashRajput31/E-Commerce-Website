@@ -21,7 +21,51 @@ import {
   HiOutlineEye,
   HiOutlineEyeOff,
   HiOutlineArrowRight,
+  HiOutlineShieldCheck,
 } from "react-icons/hi";
+
+const InputRow = ({ label, name, type = "text", placeholder, icon: Icon, value, onChange, error, showPassword, setShowPassword }) => (
+  <div>
+    <label className="block text-sm font-medium text-text-primary mb-1.5">
+      {label}
+    </label>
+    <div className="relative">
+      <Icon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
+      <input
+        type={
+          (name === "password" || name === "confirmPassword")
+            ? showPassword
+              ? "text"
+              : "password"
+            : type
+        }
+        name={name}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        className={`w-full pl-12 pr-4 py-3 bg-dark-surface border rounded-xl text-sm text-text-primary placeholder-text-muted ${
+          error ? "border-danger" : "border-dark-border/50"
+        }`}
+      />
+      {(name === "password" || name === "confirmPassword") && (
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary transition-colors"
+        >
+          {showPassword ? (
+            <HiOutlineEyeOff className="w-5 h-5" />
+          ) : (
+            <HiOutlineEye className="w-5 h-5" />
+          )}
+        </button>
+      )}
+    </div>
+    {error && (
+      <p className="text-xs text-danger mt-1">{error}</p>
+    )}
+  </div>
+);
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -33,6 +77,7 @@ const Signup = () => {
     phone: "",
     password: "",
     confirmPassword: "",
+    otp: "111111",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
@@ -55,6 +100,8 @@ const Signup = () => {
     if (!form.confirmPassword) errs.confirmPassword = "Please confirm password";
     else if (form.password !== form.confirmPassword)
       errs.confirmPassword = "Passwords don't match";
+    if (!form.otp.trim()) errs.otp = "OTP is required";
+    else if (form.otp.trim() !== "111111") errs.otp = "Default OTP is 111111";
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -69,56 +116,13 @@ const Signup = () => {
         email: form.email,
         phone: form.phone,
         password: form.password,
+        otp: form.otp,
       });
       navigate("/", { replace: true });
     } catch {
       // Error handled in AuthContext via toast
     }
   };
-
-  // Reusable input row
-  const InputRow = ({ label, name, type = "text", placeholder, icon: Icon }) => (
-    <div>
-      <label className="block text-sm font-medium text-text-primary mb-1.5">
-        {label}
-      </label>
-      <div className="relative">
-        <Icon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
-        <input
-          type={
-            (name === "password" || name === "confirmPassword")
-              ? showPassword
-                ? "text"
-                : "password"
-              : type
-          }
-          name={name}
-          value={form[name]}
-          onChange={handleChange}
-          placeholder={placeholder}
-          className={`w-full pl-12 pr-4 py-3 bg-dark-surface border rounded-xl text-sm text-text-primary placeholder-text-muted ${
-            errors[name] ? "border-danger" : "border-dark-border/50"
-          }`}
-        />
-        {(name === "password" || name === "confirmPassword") && (
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary transition-colors"
-          >
-            {showPassword ? (
-              <HiOutlineEyeOff className="w-5 h-5" />
-            ) : (
-              <HiOutlineEye className="w-5 h-5" />
-            )}
-          </button>
-        )}
-      </div>
-      {errors[name] && (
-        <p className="text-xs text-danger mt-1">{errors[name]}</p>
-      )}
-    </div>
-  );
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
@@ -141,11 +145,12 @@ const Signup = () => {
           onSubmit={handleSubmit}
           className="bg-dark-card border border-dark-border/50 rounded-2xl p-6 sm:p-8 space-y-4"
         >
-          <InputRow label="Full Name" name="name" placeholder="John Doe" icon={HiOutlineUser} />
-          <InputRow label="Email Address" name="email" type="email" placeholder="you@example.com" icon={HiOutlineMail} />
-          <InputRow label="Phone Number" name="phone" placeholder="9876543210" icon={HiOutlinePhone} />
-          <InputRow label="Password" name="password" placeholder="Min 6 characters" icon={HiOutlineLockClosed} />
-          <InputRow label="Confirm Password" name="confirmPassword" placeholder="Re-enter password" icon={HiOutlineLockClosed} />
+          <InputRow label="Full Name" name="name" value={form.name} onChange={handleChange} error={errors.name} placeholder="John Doe" icon={HiOutlineUser} />
+          <InputRow label="Email Address" name="email" type="email" value={form.email} onChange={handleChange} error={errors.email} placeholder="you@example.com" icon={HiOutlineMail} />
+          <InputRow label="Phone Number" name="phone" value={form.phone} onChange={handleChange} error={errors.phone} placeholder="9876543210" icon={HiOutlinePhone} />
+          <InputRow label="Password" name="password" value={form.password} onChange={handleChange} error={errors.password} showPassword={showPassword} setShowPassword={setShowPassword} placeholder="Min 6 characters" icon={HiOutlineLockClosed} />
+          <InputRow label="Confirm Password" name="confirmPassword" value={form.confirmPassword} onChange={handleChange} error={errors.confirmPassword} showPassword={showPassword} setShowPassword={setShowPassword} placeholder="Re-enter password" icon={HiOutlineLockClosed} />
+          <InputRow label="Verification OTP" name="otp" value={form.otp} onChange={handleChange} error={errors.otp} placeholder="111111" icon={HiOutlineShieldCheck} />
 
           {/* Submit */}
           <button

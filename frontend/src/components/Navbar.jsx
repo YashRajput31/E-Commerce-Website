@@ -14,6 +14,7 @@ import { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
+import { useWishlist } from "../context/WishlistContext";
 import {
   HiOutlineShoppingCart,
   HiOutlineUser,
@@ -22,12 +23,14 @@ import {
   HiOutlineSearch,
   HiOutlineLogout,
   HiOutlineShieldCheck,
+  HiOutlineHeart,
 } from "react-icons/hi";
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const { totalItems } = useCart();
+  const { wishlistItems } = useWishlist();
   const navigate = useNavigate();
 
   // Navigation links
@@ -54,8 +57,8 @@ const Navbar = () => {
 
   return (
     <nav className="sticky top-0 z-50 glass border-b border-dark-border/50">
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+      <div className="w-full px-6 sm:px-10 lg:px-16">
+        <div className="flex items-center justify-between h-20">
           {/* ===== Logo ===== */}
           <Link to="/" className="flex items-center gap-2 shrink-0">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-lg">
@@ -67,7 +70,7 @@ const Navbar = () => {
           </Link>
 
           {/* ===== Desktop Navigation ===== */}
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-4 lg:gap-8">
             {navLinks.map((link) => (
               <NavLink key={link.to} to={link.to} className={linkClass}>
                 {link.label}
@@ -84,7 +87,7 @@ const Navbar = () => {
           </div>
 
           {/* ===== Right Actions ===== */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4 lg:gap-6">
             {/* Search Icon (navigates to search page) */}
             <button
               onClick={() => navigate("/search")}
@@ -93,6 +96,20 @@ const Navbar = () => {
             >
               <HiOutlineSearch className="w-5 h-5" />
             </button>
+
+            {/* Wishlist Button */}
+            <Link
+              to="/wishlist"
+              className="relative p-2 rounded-lg text-text-secondary hover:text-accent hover:bg-dark-card transition-colors"
+              aria-label="Wishlist"
+            >
+              <HiOutlineHeart className="w-5 h-5" />
+              {wishlistItems.length > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-accent text-white text-xs font-bold rounded-full flex items-center justify-center animate-pulse-glow">
+                  {wishlistItems.length > 9 ? "9+" : wishlistItems.length}
+                </span>
+              )}
+            </Link>
 
             {/* Cart Button */}
             <Link

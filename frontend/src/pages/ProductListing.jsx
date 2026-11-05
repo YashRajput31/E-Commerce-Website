@@ -12,7 +12,8 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import products, { priceRanges } from "../data/products";
+import { priceRanges } from "../data/products";
+import { useProducts } from "../context/ProductContext";
 import ProductCard from "../components/ProductCard";
 import FilterSidebar from "../components/FilterSidebar";
 import { HiOutlineSortDescending, HiOutlineViewGrid } from "react-icons/hi";
@@ -21,6 +22,7 @@ const ITEMS_PER_PAGE = 8;
 
 const ProductListing = () => {
   const [searchParams] = useSearchParams();
+  const { products, categories, loading } = useProducts();
 
   // Filter state
   const [selectedCategories, setSelectedCategories] = useState(() => {
@@ -101,12 +103,12 @@ const ProductListing = () => {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="w-full max-w-full px-6 sm:px-10 lg:px-16 py-8">
       {/* Page Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-text-primary">All Products</h1>
         <p className="text-sm text-text-secondary mt-1">
-          {filteredProducts.length} products found
+          {loading ? "Loading products..." : `${filteredProducts.length} products found`}
         </p>
       </div>
 
@@ -120,6 +122,7 @@ const ProductListing = () => {
           selectedRating={selectedRating}
           onRatingChange={setSelectedRating}
           onClearAll={clearAllFilters}
+          categories={categories}
         />
 
         {/* Main Content */}
@@ -136,6 +139,7 @@ const ProductListing = () => {
                 selectedRating={selectedRating}
                 onRatingChange={setSelectedRating}
                 onClearAll={clearAllFilters}
+                categories={categories}
               />
             </div>
 

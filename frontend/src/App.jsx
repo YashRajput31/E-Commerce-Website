@@ -12,40 +12,43 @@ import { BrowserRouter } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
+import { WishlistProvider } from "./context/WishlistContext";
+import { ProductProvider } from "./context/ProductContext";
 import AppRoutes from "./routes/AppRoutes";
+import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <AuthProvider>
-        <CartProvider>
-          <AppRoutes />
+        <ProductProvider>
+          <WishlistProvider>
+            <CartProvider>
+              <AppRoutes />
           
           {/* Global Toast Configuration */}
           <Toaster
             position="top-right"
             toastOptions={{
-              className: "bg-dark-surface border border-dark-border text-text-primary",
-              style: {
-                background: "#16213E",
-                color: "#E8E8F0",
-                border: "1px solid #2A2A4A",
-              },
+              className: "bg-dark-surface border border-dark-border text-text-primary shadow-lg",
               success: {
                 iconTheme: {
-                  primary: "#00B894",
-                  secondary: "#16213E",
+                  primary: "var(--color-success)",
+                  secondary: "var(--color-dark-surface)",
                 },
               },
               error: {
                 iconTheme: {
-                  primary: "#FF6B6B",
-                  secondary: "#16213E",
+                  primary: "var(--color-danger)",
+                  secondary: "var(--color-dark-surface)",
                 },
               },
             }}
           />
-        </CartProvider>
+            </CartProvider>
+          </WishlistProvider>
+        </ProductProvider>
       </AuthProvider>
     </BrowserRouter>
   );

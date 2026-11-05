@@ -11,7 +11,7 @@
  */
 
 import { useState } from "react";
-import { categories, priceRanges } from "../data/products";
+import { categories as defaultCategories, priceRanges } from "../data/products";
 import { HiStar, HiOutlineX, HiOutlineAdjustments } from "react-icons/hi";
 
 const FilterSidebar = ({
@@ -22,6 +22,7 @@ const FilterSidebar = ({
   selectedRating = 0,
   onRatingChange,
   onClearAll,
+  categories = defaultCategories,
 }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
 

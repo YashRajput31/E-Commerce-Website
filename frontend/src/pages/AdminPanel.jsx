@@ -11,8 +11,9 @@
  */
 
 import { useState } from "react";
-import products from "../data/products";
 import toast from "react-hot-toast";
+import { useProducts } from "../context/ProductContext";
+import { productsApi } from "../services/api";
 import {
   HiOutlineCube,
   HiOutlineShoppingCart,
@@ -26,8 +27,7 @@ import {
 } from "react-icons/hi";
 
 const AdminPanel = () => {
-  // Local product state (initialized from demo data)
-  const [productList, setProductList] = useState([...products]);
+  const { products, setProducts } = useProducts();
   const [searchQuery, setSearchQuery] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -48,7 +48,7 @@ const AdminPanel = () => {
   const stats = [
     {
       label: "Total Products",
-      value: productList.length,
+      value: products.length,
       icon: HiOutlineCube,
       color: "from-blue-500/20 to-purple-500/20 border-blue-500/20",
       iconColor: "text-blue-400",
@@ -77,7 +77,7 @@ const AdminPanel = () => {
   ];
 
   // Filtered products
-  const filteredProducts = productList.filter((p) =>
+  const filteredProducts = products.filter((p) =>
     p.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -90,7 +90,7 @@ const AdminPanel = () => {
   };
 
   // Add or update product
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.title.trim() || !form.price) {
       toast.error("Title and Price are required");
@@ -98,40 +98,28 @@ const AdminPanel = () => {
     }
 
     if (editingProduct) {
-      // Update
-      setProductList((prev) =>
-        prev.map((p) =>
-          p.id === editingProduct.id
-            ? {
-                ...p,
-                title: form.title,
-                category: form.category,
-                price: Number(form.price),
-                originalPrice: Number(form.originalPrice) || Number(form.price),
-                rating: Number(form.rating),
-                description: form.description,
-                inStock: form.inStock,
-              }
-            : p
-        )
-      );
-      toast.success("Product updated successfully");
-    } else {
-      // Add new
-      const newProduct = {
-        id: Date.now(),
+      const data = await productsApi.update(editingProduct.id, {
         title: form.title,
         category: form.category,
         price: Number(form.price),
         originalPrice: Number(form.originalPrice) || Number(form.price),
         rating: Number(form.rating),
-        reviewCount: 0,
-        image: products[0].image, // use first product's placeholder
         description: form.description,
-        badge: "New",
         inStock: form.inStock,
-      };
-      setProductList((prev) => [newProduct, ...prev]);
+      });
+      setProducts((prev) => prev.map((p) => (p.id === editingProduct.id ? data.product : p)));
+      toast.success("Product updated successfully");
+    } else {
+      const data = await productsApi.create({
+        title: form.title,
+        category: form.category,
+        price: Number(form.price),
+        originalPrice: Number(form.originalPrice) || Number(form.price),
+        rating: Number(form.rating),
+        description: form.description,
+        inStock: form.inStock,
+      });
+      setProducts((prev) => [data.product, ...prev]);
       toast.success("Product added successfully");
     }
 
@@ -156,8 +144,9 @@ const AdminPanel = () => {
   };
 
   // Delete product
-  const handleDelete = (id) => {
-    setProductList((prev) => prev.filter((p) => p.id !== id));
+  const handleDelete = async (id) => {
+    await productsApi.remove(id);
+    setProducts((prev) => prev.filter((p) => p.id !== id));
     toast.success("Product deleted");
   };
 

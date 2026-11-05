@@ -21,6 +21,7 @@ import ProductListing from "../pages/ProductListing";
 import ProductDetails from "../pages/ProductDetails";
 import SearchFilter from "../pages/SearchFilter";
 import Cart from "../pages/Cart";
+import Wishlist from "../pages/Wishlist";
 import Checkout from "../pages/Checkout";
 import Login from "../pages/Login";
 import Signup from "../pages/Signup";
@@ -54,6 +55,7 @@ const AppRoutes = () => {
         <Route path="/products/:id" element={<ProductDetails />} />
         <Route path="/search" element={<SearchFilter />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/wishlist" element={<Wishlist />} />
         
         {/* Auth Routes (can be accessed without login, could add auth-reverse-guard if needed) */}
         <Route path="/login" element={<Login />} />

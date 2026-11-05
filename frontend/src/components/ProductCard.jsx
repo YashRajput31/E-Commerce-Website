@@ -37,7 +37,7 @@ const ProductCard = ({ product }) => {
     <div className="group relative bg-dark-card border border-dark-border/50 rounded-2xl overflow-hidden hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
       {/* Badge */}
       {product.badge && (
-        <div className="absolute top-3 left-3 z-10 px-2.5 py-1 bg-gradient-to-r from-accent to-accent-dark text-white text-xs font-semibold rounded-full shadow-lg">
+        <div className="absolute top-3 left-3 z-10 px-2.5 py-1 bg-linear-to-r from-accent to-accent-dark text-white text-xs font-semibold rounded-full shadow-lg">
           {product.badge}
         </div>
       )}
@@ -61,7 +61,7 @@ const ProductCard = ({ product }) => {
             loading="lazy"
           />
           {/* Gradient overlay on hover */}
-          <div className="absolute inset-0 bg-gradient-to-t from-dark-card/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="absolute inset-0 bg-linear-to-t from-dark-card/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </div>
       </Link>
 
@@ -111,7 +111,7 @@ const ProductCard = ({ product }) => {
             if (product.inStock) addToCart(product);
           }}
           disabled={!product.inStock}
-          className="w-full mt-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-primary to-primary-dark text-white text-sm font-medium hover:shadow-lg hover:shadow-primary/25 active:scale-[0.98] transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full mt-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-linear-to-r from-primary to-primary-dark text-white text-sm font-medium hover:shadow-lg hover:shadow-primary/25 active:scale-[0.98] transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <HiOutlineShoppingCart className="w-4 h-4" />
           Add to Cart
